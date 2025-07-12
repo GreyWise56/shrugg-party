@@ -42,6 +42,9 @@ const reactBuildPath = path.join(__dirname, '..', 'shruggbot-ui', 'build');
 console.log("📂 React build path:", reactBuildPath);
 app.use(express.static(reactBuildPath));
 
+// Serve static assets from React
+app.use('/static', express.static(path.join(reactBuildPath, 'static')));
+
 // Health check route (for Railway)
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
