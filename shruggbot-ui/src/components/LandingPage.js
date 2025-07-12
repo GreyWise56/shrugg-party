@@ -29,7 +29,7 @@ const LandingPage = () => {
         <section className="mt-16 flex justify-center">
           <ShruggBot />
         </section>
-<div className="text-center mt-6">
+<div className="max-w-xl mx-auto mt-10">
   <a
     href="https://coff.ee/postmeridiempost"
     target="_blank"
