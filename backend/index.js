@@ -15,6 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 // --- Static Frontend Serving ---
+// This serves all the static files like CSS, JS, and images from your React build folder.
 const buildPath = path.join(__dirname, '../shruggbot-ui/build');
 app.use(express.static(buildPath));
 
@@ -170,27 +171,12 @@ app.post('/api/shrugg', async (req, res) => {
   }
 });
 
-// --- NEW Health Check Route ---
-// This route is used to confirm the server is responsive.
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-});
-
 // --- Catch-all Route for React Frontend ---
-// This must be the LAST route.
+// This MUST be the last route so it doesn't interfere with your API endpoints.
+// It serves the main index.html file to any request that isn't for a static file or your API.
+// This is essential for client-side routing (React Router) to work.
 app.get('/*', (req, res) => {
-  const indexFile = path.join(__dirname, '../shruggbot-ui/build/index.html');
-  
-  // NEW: Log the exact path for debugging
-  console.log('Attempting to serve file from path:', indexFile);
-
-  if (fs.existsSync(indexFile)) {
-    res.sendFile(indexFile);
-  } else {
-    // NEW: Log an error if the file doesn't exist
-    console.error('File does not exist at path:', indexFile);
-    res.status(404).send(`File not found at: ${indexFile}`);
-  }
+  res.sendFile(path.join(__dirname, '../shruggbot-ui/build', 'index.html'));
 });
 
 // --- Server Startup ---
