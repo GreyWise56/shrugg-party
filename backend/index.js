@@ -15,8 +15,6 @@ app.use(express.json());
 app.use(cors());
 
 // --- Static Frontend Serving ---
-// This MUST come before your API routes and catch-all route.
-// It serves all the static files like CSS, JS, and images from your React build folder.
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
@@ -37,24 +35,24 @@ const openai = new OpenAI({
 // --- API Endpoint ---
 app.use('/api/shrugg', shruggLimiter);
 app.post('/api/shrugg', async (req, res) => {
-  // ... your existing API code
+  // ... your existing API code (pasted here for completeness)
 });
 
+// --- Health Check Route ---
+// This route now comes BEFORE the catch-all, so it can be reached.
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
 // --- Catch-all Route for React Frontend ---
-// This MUST be the last route.
-// It serves the main index.html file to any request that isn't for a static file or your API.
+// This MUST be the last route before the server starts.
 app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // --- Server Startup ---
+// This MUST be at the very end of the file.
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
-});
-
-// --- Health --- 
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
 });
