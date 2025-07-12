@@ -13,14 +13,17 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Rate limit API
+// Confirm startup
+console.log("👣 Starting ShruggBot server...");
+
+// Rate limiter
 const shruggLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 50,
 });
 app.use('/api/shrugg', shruggLimiter);
 
-// Dummy API handler (replace with your logic)
+// Dummy API route
 app.post('/api/shrugg', async (req, res) => {
   try {
     const { text, mode, tones } = req.body;
@@ -28,34 +31,38 @@ app.post('/api/shrugg', async (req, res) => {
       reaction: `Shrugging at: ${text}`,
       score: Math.floor(Math.random() * 10) + 1,
     });
-  } catch (error) {
-    console.error('API error:', error);
+  } catch (err) {
+    console.error('API error:', err);
     res.status(500).json({ error: 'Something broke.' });
   }
 });
 
-// Serve React static files
-const publicPath = path.join(__dirname, '..', 'public');
-app.use(express.static(publicPath));
+// Serve React from build
+const reactBuildPath = path.join(__dirname, '..', 'shruggbot-ui', 'build');
+console.log("📂 React build path:", reactBuildPath);
 
-// Health check (for Railway)
+app.use(express.static(reactBuildPath));
+
+// Health check
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Debug route to verify index.html is found
+// Debug: verify index.html exists
 app.get('/debug-index', (req, res) => {
-  const indexPath = path.join(publicPath, 'index.html');
+  const indexPath = path.join(reactBuildPath, 'index.html');
   const exists = fs.existsSync(indexPath);
   res.send(`index.html exists: ${exists}`);
 });
 
 // Catch-all: serve React app
 app.get('/*', (req, res) => {
-  const indexFile = path.join(publicPath, 'index.html');
+  const indexFile = path.join(reactBuildPath, 'index.html');
   if (fs.existsSync(indexFile)) {
+    console.log("✅ Serving React app...");
     res.sendFile(indexFile);
   } else {
+    console.error("❌ index.html not found!");
     res.status(500).send('index.html not found.');
   }
 });
