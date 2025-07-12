@@ -5,6 +5,7 @@ const { OpenAI } = require('openai');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
+const path = require('path'); // ✅ Needed to serve frontend
 
 dotenv.config();
 
@@ -12,10 +13,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// ✅ Serve React static build
+app.use(express.static(path.join(__dirname, 'build')));
+
 // 🛡️ Rate Limiting Middleware
 const shruggLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 requests per window
+  max: 50,
   message: {
     reaction: "You’re Shruggin' too hard. Even Nutwhisker needs a break.",
     score: 10
@@ -29,7 +33,6 @@ const openai = new OpenAI({
 });
 
 // --- Helper Functions ---
-
 const isUrl = (string) => {
   try {
     new URL(string);
@@ -55,8 +58,7 @@ const getTitleFromUrl = async (url) => {
   }
 };
 
-// --- Prompts for Different Modes ---
-
+// --- Prompts ---
 const describeTone = (level, type) => {
   const descriptions = {
     sarcasm: ['a hint of sarcasm', 'a healthy dose of sarcasm', 'dripping with sarcasm'],
@@ -104,7 +106,6 @@ RULES:
 };
 
 // --- API Endpoint ---
-
 app.post('/api/shrugg', async (req, res) => {
   let { text: inputText, mode = 'general', tones = { sarcasm: 5, nihilism: 5, absurdity: 5 } } = req.body;
 
@@ -183,6 +184,11 @@ app.post('/api/shrugg', async (req, res) => {
       details: err.message
     });
   }
+});
+
+// ✅ Catch-all route to serve React frontend
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.listen(3000, () => console.log('🚀 ShruggBot server running on http://localhost:3000'));
