@@ -29,14 +29,14 @@ const LandingPage = () => {
         <section className="mt-16 flex justify-center">
           <ShruggBot />
         </section>
-<div className="max-w-xl mx-auto mt-10">
+<div className="flex justify-center mt-10">
   <a
     href="https://coff.ee/postmeridiempost"
     target="_blank"
     rel="noopener noreferrer"
     className="inline-block bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition"
   >
-    ☕ Buy Us a Coffee
+    ☕ Sustain the Shrugg
   </a>
 </div>
         {/* Footer */}
