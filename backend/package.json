@@ -1,5 +1,5 @@
 {
-  "name": "shrugg-bot",
+  "name": "backend",
   "version": "1.0.0",
   "description": "ShruggBot: Reacts sarcastically to headlines and scores them on the Shrugg-o-Meter.",
   "main": "index.js",

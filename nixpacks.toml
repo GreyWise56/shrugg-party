@@ -1,12 +1,12 @@
-# nixpacks.toml (Final Version)
+# nixpacks.toml (Workspace Version)
 
 providers = ["node"]
 
 [phases.install]
-cmds = ["npm install", "(cd shruggbot-ui && npm install)"]
+cmds = ["npm install"]
 
 [phases.build]
-cmds = ["cd shruggbot-ui && npm run build"]
+cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"

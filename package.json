@@ -1,0 +1,13 @@
+{
+  "name": "shrugg-party-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "shruggbot-ui"
+  ],
+  "scripts": {
+    "start": "npm start --workspace=backend",
+    "build": "npm run build --workspace=shruggbot-ui"
+  }
+}
