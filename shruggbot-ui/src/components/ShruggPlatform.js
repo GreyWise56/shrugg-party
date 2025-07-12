@@ -21,7 +21,7 @@ export default function ShruggPlatform() {
         {/* Mission Statement */}
         <div className="prose prose-lg max-w-3xl mx-auto text-gray-800">
           <p>
-  Legacy parties are funded by billionaires and alphabet-soup lobbies. The &#175;&#92;_(&#12539;_&#12539;)/¯ Party proudly stands alone, unsupported by AIPAC, Blackstone, or any tech founder with a space fetish.
+  Legacy parties are funded by billionaires and alphabet-soup lobbies. The ¯\_(ツ)_/¯ Party proudly stands alone, unsupported by AIPAC, Blackstone, or any tech founder with a space fetish.
 </p>
         </div>
 
