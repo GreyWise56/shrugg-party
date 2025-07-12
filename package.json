@@ -5,10 +5,16 @@
   "scripts": {
     "postinstall": "npm run build-frontend && npm run install-backend",
     "build-frontend": "cd shruggbot-ui && npm install && npm run build",
-    "install-backend": "cd backend && npm install",
-    "start": "node backend/index.js"
+    "install-backend": "npm install",
+    "start": "node index.js"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^6.11.2"
   }
 }
