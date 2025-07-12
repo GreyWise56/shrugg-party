@@ -1,7 +1,16 @@
-// ShruggPlatform.js
-// Displays The ¯\_(ツ)_/¯ Party's platform below the ShruggBot section
-
 import React from 'react';
+
+function PlatformCard({ title, text, emoji }) {
+  return (
+    <div className="bg-white rounded-xl p-6 border shadow-sm hover:shadow-md transition-all">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-2xl">{emoji}</span>
+        <h4 className="text-xl font-bold">{title}</h4>
+      </div>
+      <p className="text-gray-700">{text}</p>
+    </div>
+  );
+}
 
 export default function ShruggPlatform() {
   return (
@@ -12,9 +21,8 @@ export default function ShruggPlatform() {
         {/* Mission Statement */}
         <div className="prose prose-lg max-w-3xl mx-auto text-gray-800">
           <p>
-            Unlike the legacy parties—funded by billionaires and alphabet-soup lobbies—the ¯\\_(ツ)_/¯ Party is proud to stand alone, unsupported by AIPAC, Blackstone, or a single tech founder with a space fetish.
-            Our platform is simple, unpolished, and completely free of compromise.
-          </p>
+  Legacy parties are funded by billionaires and alphabet-soup lobbies. The &#175;&#92;_(&#12539;_&#12539;)/¯ Party proudly stands alone, unsupported by AIPAC, Blackstone, or any tech founder with a space fetish.
+</p>
         </div>
 
         {/* Policy Grid */}
@@ -55,17 +63,5 @@ export default function ShruggPlatform() {
         </div>
       </div>
     </section>
-  );
-}
-
-function PlatformCard({ title, text, emoji }) {
-  return (
-    <div className="bg-white rounded-xl p-6 border shadow-sm hover:shadow-md transition-all">
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-2xl">{emoji}</span>
-        <h4 className="text-xl font-bold">{title}</h4>
-      </div>
-      <p className="text-gray-700">{text}</p>
-    </div>
   );
 }
