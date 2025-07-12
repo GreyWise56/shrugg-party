@@ -45,6 +45,11 @@ app.get('/debug-index', (_, res) => {
   res.send(`index.html exists: ${exists}`);
 });
 
+// ✅ New fallback root route to avoid Railway 502
+app.get('/', (_, res) => {
+  res.send('ShruggBot backend is running!');
+});
+
 // Catch-all to React app
 app.get('*', (req, res) => {
   const indexFile = path.join(reactBuildPath, 'index.html');
