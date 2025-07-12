@@ -2,18 +2,18 @@
 /node_modules
 /shruggbot-ui/node_modules
 
-# Allow React build to be committed
-# /shruggbot-ui/build ← ⬅️ this line was preventing deploys
-
-# Environment Variables
+# Ignore .env files (but keep them available locally)
 .env
 
-# Production
-#/build
-#/dummy 
+# Build artifacts (only ignore if you're not deploying from them)
+#/shruggbot-ui/build   <-- DON'T IGNORE if you need it deployed!
 
-# misc
+# Misc system files
 .DS_Store
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Old/deprecated directories (remove or uncomment as needed)
+#/build
+#/dummy
