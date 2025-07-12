@@ -16,7 +16,7 @@ app.use(cors());
 
 // --- Static Frontend Serving ---
 // This serves all the static files like CSS, JS, and images from your React build folder.
-const buildPath = path.join(__dirname, '../shruggbot-ui/build');
+const buildPath = path.join(__dirname, 'public');
 app.use(express.static(buildPath));
 
 // --- API Rate Limiting ---
