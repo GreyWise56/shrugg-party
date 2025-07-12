@@ -1,14 +1,9 @@
-# nixpacks.toml (Final Diagnostic Version)
+# nixpacks.toml (Final Version)
 
 providers = ["node"]
 
 [phases.install]
-cmds = [
-  "echo '--- STEP 1: Listing files in the current directory ---'",
-  "ls -la",
-  "echo '--- STEP 2: Installing dependencies ---'",
-  "npm install"
-]
+cmds = ["npm install"]
 
 [phases.build]
 cmds = ["npm run build"]
