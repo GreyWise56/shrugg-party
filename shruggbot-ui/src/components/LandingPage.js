@@ -29,7 +29,16 @@ const LandingPage = () => {
         <section className="mt-16 flex justify-center">
           <ShruggBot />
         </section>
-
+<div className="text-center mt-6">
+  <a
+    href="https://www.buymeacoffee.com/YOURUSERNAME"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-block bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition"
+  >
+    ☕ Buy Me a Coffee
+  </a>
+</div>
         {/* Footer */}
         <footer className="text-center pt-12 mt-12 border-t border-gray-200">
           <p className="text-sm text-gray-500">
