@@ -36,7 +36,7 @@ const LandingPage = () => {
     rel="noopener noreferrer"
     className="inline-block bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition"
   >
-    ☕ Sustain the Bot
+    ☕ Sustain the Shrugg
   </a>
 </div>
         {/* Footer */}
