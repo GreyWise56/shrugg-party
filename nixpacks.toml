@@ -1,9 +1,12 @@
-# nixpacks.toml (Workspace Version)
+# nixpacks.toml (Diagnostic Version)
 
 providers = ["node"]
 
 [phases.install]
-cmds = ["npm install"]
+cmds = [
+  "ls -la",
+  "npm install"
+]
 
 [phases.build]
 cmds = ["npm run build"]
