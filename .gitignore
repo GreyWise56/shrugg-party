@@ -1,13 +1,15 @@
 # Dependencies
 /node_modules
 /shruggbot-ui/node_modules
-/shruggbot-ui/build
+
+# Allow React build to be committed
+# /shruggbot-ui/build ← ⬅️ this line was preventing deploys
 
 # Environment Variables
 .env
 
 # Production
- /build
+/build
 
 # misc
 .DS_Store
