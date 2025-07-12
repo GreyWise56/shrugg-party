@@ -8,17 +8,17 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 
-console.log('✅ [INIT] Server script starting...');
-
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-console.log('✅ [INIT] Express app initialized.');
-
-// NOTE: We have REMOVED app.use(express.static) to be more explicit.
+// --- Static Frontend Serving ---
+// This MUST come before your API routes and catch-all route.
+// It serves all the static files like CSS, JS, and images from your React build folder.
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
 
 // --- API Rate Limiting ---
 const shruggLimiter = rateLimit({
@@ -31,8 +31,8 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// --- (All your helper functions and prompt logic would be here, unchanged) ---
-// ... (imagine all your functions like isUrl, getTitleFromUrl, prompts, etc. are here)
+// --- (All your helper functions and prompt logic would be here) ---
+// ...
 
 // --- API Endpoint ---
 app.use('/api/shrugg', shruggLimiter);
@@ -40,31 +40,16 @@ app.post('/api/shrugg', async (req, res) => {
   // ... your existing API code
 });
 
-// --- Health Check Route ---
-app.get('/health', (req, res) => {
-  console.log(`[${new Date().toISOString()}] ✅ Health check hit successfully!`);
-  res.status(200).send('OK');
-});
 
 // --- Catch-all Route for React Frontend ---
-// This MUST be the last route. It will handle serving your React app.
+// This MUST be the last route.
+// It serves the main index.html file to any request that isn't for a static file or your API.
 app.get('/*', (req, res) => {
-  console.log(`[${new Date().toISOString()}] ➡️  Catch-all route hit for path: ${req.path}`);
-  const indexHtmlPath = path.join(__dirname, 'public', 'index.html');
-  
-  res.sendFile(indexHtmlPath, (err) => {
-    if (err) {
-      console.error(`❌ [ERROR] Failed to send index.html:`, err);
-      res.status(500).send('Could not send the main application file.');
-    } else {
-      console.log(`[${new Date().toISOString()}] ✅ Successfully sent index.html`);
-    }
-  });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // --- Server Startup ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
-  console.log('✅ [READY] Server is now listening.');
 });
