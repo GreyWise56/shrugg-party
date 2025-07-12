@@ -8,7 +8,7 @@ const fs = require('fs');
 // Load environment variables
 dotenv.config();
 
-// Init app
+// Initialize Express app
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -16,14 +16,14 @@ app.use(cors());
 // Confirm startup
 console.log("👣 Starting ShruggBot server...");
 
-// Rate limiter
+// API rate limiting
 const shruggLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 50,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // limit each IP to 50 requests
 });
 app.use('/api/shrugg', shruggLimiter);
 
-// Dummy API route
+// Dummy API route (replace with real logic later)
 app.post('/api/shrugg', async (req, res) => {
   try {
     const { text, mode, tones } = req.body;
@@ -37,25 +37,24 @@ app.post('/api/shrugg', async (req, res) => {
   }
 });
 
-// Serve React from build
+// Serve React static files
 const reactBuildPath = path.join(__dirname, '..', 'shruggbot-ui', 'build');
 console.log("📂 React build path:", reactBuildPath);
-
 app.use(express.static(reactBuildPath));
 
-// Health check
+// Health check route (for Railway)
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Debug: verify index.html exists
+// Debug route to confirm index.html exists
 app.get('/debug-index', (req, res) => {
   const indexPath = path.join(reactBuildPath, 'index.html');
   const exists = fs.existsSync(indexPath);
   res.send(`index.html exists: ${exists}`);
 });
 
-// Catch-all: serve React app
+// Catch-all route to serve React frontend
 app.get('/*', (req, res) => {
   const indexFile = path.join(reactBuildPath, 'index.html');
   if (fs.existsSync(indexFile)) {
