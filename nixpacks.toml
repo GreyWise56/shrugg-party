@@ -1,16 +1,12 @@
-# nixpacks.toml
+# nixpacks.toml (Final Version)
 
-# Explicitly tell Nixpacks to install Node.js and npm
 providers = ["node"]
 
-# Define the installation phase
 [phases.install]
-cmds = ["(cd backend && npm install) && (cd shruggbot-ui && npm install)"]
+cmds = ["npm install", "(cd shruggbot-ui && npm install)"]
 
-# Define the build phase
 [phases.build]
 cmds = ["cd shruggbot-ui && npm run build"]
 
-# Define the correct start command
 [start]
-cmd = "cd backend && npm start"
+cmd = "npm start"
