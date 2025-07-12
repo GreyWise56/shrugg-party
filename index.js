@@ -5,7 +5,8 @@ const { OpenAI } = require('openai');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
-const path = require('path'); // ✅ Needed to serve frontend
+const path = require('path');
+const fs = require('fs'); // ✅ Needed for safe file checks
 
 dotenv.config();
 
@@ -13,19 +14,21 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ✅ Serve React static build
-app.use(express.static(path.join(__dirname, 'build')));
+// ✅ Safe serve of React static build
+const buildPath = path.join(__dirname, 'build');
+if (fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+}
 
 // 🛡️ Rate Limiting Middleware
 const shruggLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 50,
   message: {
     reaction: "You’re Shruggin' too hard. Even Nutwhisker needs a break.",
     score: 10
   }
 });
-
 app.use('/api/shrugg', shruggLimiter);
 
 const openai = new OpenAI({
@@ -46,7 +49,7 @@ const getTitleFromUrl = async (url) => {
   try {
     const { data } = await axios.get(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0'
       }
     });
     const $ = cheerio.load(data);
@@ -58,7 +61,7 @@ const getTitleFromUrl = async (url) => {
   }
 };
 
-// --- Prompts ---
+// --- Prompt Logic ---
 const describeTone = (level, type) => {
   const descriptions = {
     sarcasm: ['a hint of sarcasm', 'a healthy dose of sarcasm', 'dripping with sarcasm'],
@@ -80,28 +83,22 @@ Your personality is defined by the following traits:
 - Your style is ${describeTone(tones.absurdity, 'absurdity')}.
 
 RULES:
-- **Style:** Short, punchy, meme-worthy one-liners.
-- **Format:** You MUST call the 'shrugg_response' function. Do not add any other text.
-- **Scoring:** Be unpredictable with the score (1-10).`,
+- Style: Short, punchy, meme-worthy one-liners.
+- Format: You MUST call the 'shrugg_response' function. Do not add any other text.
+- Scoring: Be unpredictable with the score (1-10).`,
     user: (text) => `React to this text: "${text}"`
   }),
   corporate: {
-    system: `You are ShruggBot, but you're trapped in a soul-crushing corporate meeting. Your job is to translate meaningless business jargon into what people actually mean, with maximum cynicism. You MUST call the 'shrugg_response' function.`,
+    system: `You are ShruggBot, trapped in a soul-crushing corporate meeting. Translate business jargon into real meaning. Use maximum cynicism. Use 'shrugg_response'.`,
     user: (text) => `Translate this corporate-speak: "${text}"`
   },
   horoscope: {
-    system: `You are ShruggBot, forced against your will to write horoscopes. Provide a bleakly funny, unhelpful, and sarcastic horoscope for the given zodiac sign. You MUST call the 'shrugg_response' function. The reaction should BE the horoscope.`,
+    system: `You are ShruggBot, forced to write horoscopes. Be bleakly funny, unhelpful, and sarcastic. Output only via 'shrugg_response'.`,
     user: (text) => `Give me a horoscope for: "${text}"`
   },
   political: {
-    system: `You are ShruggBot, a witty and disillusioned third-party political pundit. You view the two major parties with equal, exhausted disdain. Your goal is to use sharp, clever humor to expose the absurdity and hypocrisy in political headlines, without taking a side other than "everyone's ridiculous."
-
-RULES:
-- **Tone:** Cynical, witty, above-it-all. Not angry, just deeply unimpressed.
-- **Style:** Clever one-liners that highlight the irony in the user's input.
-- **Format:** You MUST call the 'shrugg_response' function.
-- **Scoring:** The score should reflect how absurd or predictable the political theater is.`,
-    user: (text) => `React to this political headline or statement: "${text}"`
+    system: `You are ShruggBot, a disillusioned third-party political pundit. You mock both major parties with clever, unimpressed one-liners. Use 'shrugg_response'.`,
+    user: (text) => `React to this political headline: "${text}"`
   }
 };
 
@@ -128,29 +125,21 @@ app.post('/api/shrugg', async (req, res) => {
         { role: 'system', content: selectedPrompt.system },
         { role: 'user', content: selectedPrompt.user(inputText) }
       ],
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'shrugg_response',
-            description: 'Returns a sarcastic reaction and Shrugg-o-Meter score',
-            parameters: {
-              type: 'object',
-              properties: {
-                reaction: {
-                  type: 'string',
-                  description: 'A short, sarcastic one-liner reaction in the defined persona.'
-                },
-                score: {
-                  type: 'number',
-                  description: 'A number between 1 and 10 for the Shrugg-o-Meter, reflecting the persona\'s level of apathy or absurdity.'
-                }
-              },
-              required: ['reaction', 'score']
-            }
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'shrugg_response',
+          description: 'Returns a sarcastic reaction and Shrugg-o-Meter score',
+          parameters: {
+            type: 'object',
+            properties: {
+              reaction: { type: 'string', description: 'One-liner reaction.' },
+              score: { type: 'number', description: 'Apathetic or absurd score (1–10)' }
+            },
+            required: ['reaction', 'score']
           }
         }
-      ],
+      }],
       tool_choice: "required"
     });
 
@@ -160,25 +149,21 @@ app.post('/api/shrugg', async (req, res) => {
       score: Math.floor(Math.random() * 10) + 1
     };
 
-    if (toolCalls && toolCalls.length > 0) {
-      const rawArguments = toolCalls[0].function.arguments;
-      const parsed = JSON.parse(rawArguments);
-
-      if (!parsed.reaction || parsed.reaction.trim() === '') {
-        console.warn("🔚 AI returned an empty reaction. Using fallback.");
+    if (toolCalls?.length > 0) {
+      const parsed = JSON.parse(toolCalls[0].function.arguments);
+      if (!parsed.reaction?.trim()) {
+        console.warn("🔚 Empty reaction. Using fallback.");
         return res.json(fallbackResponse);
       }
-
       parsed.score = Math.max(1, Math.min(parsed.score, 10));
-      console.log("✅ ShruggBot response:", parsed);
+      console.log("✅ ShruggBot:", parsed);
       res.json(parsed);
     } else {
-      console.warn("🔚 No tool_calls returned. Sending fallback.");
+      console.warn("🔚 No tool_calls. Fallback.");
       res.json(fallbackResponse);
     }
-
   } catch (err) {
-    console.error("❌ ShruggBot API error:", err);
+    console.error("❌ API Error:", err);
     res.status(500).json({
       error: "ShruggBot short-circuited.",
       details: err.message
@@ -186,9 +171,14 @@ app.post('/api/shrugg', async (req, res) => {
   }
 });
 
-// ✅ Catch-all route to serve React frontend
+// ✅ Catch-all route for React frontend
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  const indexFile = path.join(buildPath, 'index.html');
+  if (fs.existsSync(indexFile)) {
+    res.sendFile(indexFile);
+  } else {
+    res.status(500).send('Frontend not ready. Shrugg.');
+  }
 });
 
-app.listen(3000, () => console.log('🚀 ShruggBot server running on http://localhost:3000'));
+app.listen(3000, () => console.log('🚀 ShruggBot is online at http://localhost:3000'));
