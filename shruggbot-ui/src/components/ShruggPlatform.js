@@ -12,7 +12,7 @@ export default function ShruggPlatform() {
         {/* Mission Statement */}
         <div className="prose prose-lg max-w-3xl mx-auto text-gray-800">
           <p>
-            Unlike the legacy parties—funded by billionaires and alphabet-soup lobbies—the ¯\_(ツ)_/¯ Party is proud to stand alone, unsupported by AIPAC, Blackstone, or a single tech founder with a space fetish.
+            Unlike the legacy parties—funded by billionaires and alphabet-soup lobbies—the ¯\\_(ツ)_/¯ Party is proud to stand alone, unsupported by AIPAC, Blackstone, or a single tech founder with a space fetish.
             Our platform is simple, unpolished, and completely free of compromise.
           </p>
         </div>
