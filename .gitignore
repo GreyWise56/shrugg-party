@@ -10,7 +10,7 @@
 
 # Production
 #/build
-#/dummy
+#/dummy text
 
 # misc
 .DS_Store
