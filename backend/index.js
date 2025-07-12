@@ -6,7 +6,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const fs = require('fs'); // ✅ Needed for safe file checks
+const fs = require('fs');
 
 dotenv.config();
 
@@ -14,14 +14,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ✅ Safe serve of React static build
+// --- Static Frontend Serving ---
 const buildPath = path.join(__dirname, '../shruggbot-ui/build');
-console.log("🛠️ Serving React build from:", buildPath);
-if (fs.existsSync(buildPath)) {
-  app.use(express.static(buildPath));
-}
+app.use(express.static(buildPath));
 
-// 🛡️ Rate Limiting Middleware
+// --- API Rate Limiting ---
 const shruggLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 50,
@@ -30,8 +27,8 @@ const shruggLimiter = rateLimit({
     score: 10
   }
 });
-app.use('/api/shrugg', shruggLimiter);
 
+// --- OpenAI Configuration ---
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
@@ -76,8 +73,8 @@ const describeTone = (level, type) => {
 
 const prompts = {
   general: (tones) => ({
-    system: `You are ShruggBot. Your persona is a "chronically online," 20-something who is deeply unimpressed by everything. 
-    
+    system: `You are ShruggBot. Your persona is a "chronically online," 20-something who is deeply unimpressed by everything.
+
 Your personality is defined by the following traits:
 - Your humor is ${describeTone(tones.sarcasm, 'sarcasm')}.
 - Your outlook has ${describeTone(tones.nihilism, 'nihilism')}.
@@ -104,6 +101,7 @@ RULES:
 };
 
 // --- API Endpoint ---
+app.use('/api/shrugg', shruggLimiter);
 app.post('/api/shrugg', async (req, res) => {
   let { text: inputText, mode = 'general', tones = { sarcasm: 5, nihilism: 5, absurdity: 5 } } = req.body;
 
@@ -172,16 +170,30 @@ app.post('/api/shrugg', async (req, res) => {
   }
 });
 
-// ✅ Catch-all route for React frontend
+// --- NEW Health Check Route ---
+// This route is used to confirm the server is responsive.
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// --- Catch-all Route for React Frontend ---
+// This must be the LAST route.
 app.get('/*', (req, res) => {
-  const indexFile = path.join(buildPath, 'index.html');
+  const indexFile = path.join(__dirname, '../shruggbot-ui/build/index.html');
+  
+  // NEW: Log the exact path for debugging
+  console.log('Attempting to serve file from path:', indexFile);
+
   if (fs.existsSync(indexFile)) {
     res.sendFile(indexFile);
   } else {
-    res.status(500).send('Frontend not ready. Shrugg.');
+    // NEW: Log an error if the file doesn't exist
+    console.error('File does not exist at path:', indexFile);
+    res.status(404).send(`File not found at: ${indexFile}`);
   }
 });
 
+// --- Server Startup ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
