@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd shruggbot-ui && npm install && npm run build",
-    "start": "node index.js",
-    "dev": "node index.js"
-  },
+  "build-frontend": "cd shruggbot-ui && npm install && npm run build",
+  "install-backend": "npm install",
+  "start": "node index.js"
+},
   "engines": {
     "node": ">=18.0.0"
   },

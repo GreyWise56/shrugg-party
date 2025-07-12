@@ -1,82 +1,78 @@
 const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+const fs = require('fs');
+
+// Load environment variables
+dotenv.config();
+
+// Init app
 const app = express();
+app.use(express.json());
+app.use(cors());
 
-// Railway-specific middleware
-app.use(express.json({ limit: '10mb' }));
+console.log("👣 Starting ShruggBot server...");
 
-// Add this - Railway sometimes needs explicit headers
-app.use((req, res, next) => {
-  res.header('X-Powered-By', 'ShruggBot');
-  next();
+// Rate limit for API
+const shruggLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
 });
+app.use('/api/shrugg', shruggLimiter);
 
-// Health check FIRST
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
-});
-
-// Root route
-app.get('/', (req, res) => {
-  res.status(200).send(`
-    <!DOCTYPE html>
-    <html>
-      <head><title>ShruggBot</title></head>
-      <body>
-        <h1>ShruggBot is alive! 🤷‍♂️</h1>
-        <p>Railway deployment successful</p>
-        <a href="/health">Health Check</a>
-      </body>
-    </html>
-  `);
-});
-
-// Your API route
-app.post('/api/shrugg', (req, res) => {
-  const { text } = req.body || {};
+// Dummy API handler
+app.post('/api/shrugg', async (req, res) => {
+  const { text } = req.body;
   res.json({
-    reaction: `Shrugging at: ${text || 'nothing'}`,
+    reaction: `Shrugging at: ${text}`,
     score: Math.floor(Math.random() * 10) + 1,
   });
 });
 
-// Catch unhandled routes
-app.use('*', (req, res) => {
-  res.status(404).send('Route not found');
+// React static files
+const reactBuildPath = path.join(__dirname, 'shruggbot-ui', 'build');
+console.log("📂 React build path:", reactBuildPath);
+console.log("📁 React build exists?", fs.existsSync(reactBuildPath));
+console.log("🔍 Current working directory:", process.cwd());
+console.log("🗂 __dirname:", __dirname);
+
+app.use(express.static(reactBuildPath));
+
+// Health check route
+app.get('/health', (_, res) => res.status(200).send('OK'));
+
+// Debug route to check for index.html
+app.get('/debug-index', (_, res) => {
+  const indexPath = path.join(reactBuildPath, 'index.html');
+  const exists = fs.existsSync(indexPath);
+  res.send(`index.html exists: ${exists}`);
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).send('Internal Server Error');
+// ✅ Fallback GET / route to prevent Railway 502
+app.get('/', (_, res) => {
+  res.send('ShruggBot backend is running!');
 });
 
-const PORT = process.env.PORT || 3000;
-
-// Railway-specific server startup
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server started on port ${PORT}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`💻 Platform: ${process.platform}`);
-  console.log(`🔗 Listening on: http://0.0.0.0:${PORT}`);
+// Catch-all: serve React frontend
+app.get('*', (req, res) => {
+  const indexFile = path.join(reactBuildPath, 'index.html');
+  if (fs.existsSync(indexFile)) {
+    console.log("✅ Serving React app...");
+    res.sendFile(indexFile);
+  } else {
+    console.error("❌ index.html not found!");
+    res.status(500).send('index.html not found.');
+  }
 });
 
-// Handle Railway's shutdown signals
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down...');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
+// Start server
+try {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
   });
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down...');
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
-});
+} catch (err) {
+  console.error("❌ Server crashed on startup:", err);
+}
