@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 // ✅ Safe serve of React static build
-const buildPath = path.join(__dirname, '../shruggbot-ui/build');
+const buildPath = path.join(__dirname, 'shruggbot-ui/build');
 console.log("🛠️ Serving React build from:", buildPath);
 if (fs.existsSync(buildPath)) {
   app.use(express.static(buildPath));
