@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "npm run build-frontend && npm run install-backend",
     "build-frontend": "cd shruggbot-ui && npm install && npm run build",
     "install-backend": "npm install",
     "start": "node index.js"
