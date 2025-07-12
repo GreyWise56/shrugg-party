@@ -31,7 +31,7 @@ const LandingPage = () => {
         </section>
 <div className="text-center mt-6">
   <a
-    href="https://www.buymeacoffee.com/YOURUSERNAME"
+    href="https://coff.ee/postmeridiempost"
     target="_blank"
     rel="noopener noreferrer"
     className="inline-block bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition"
