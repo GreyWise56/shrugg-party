@@ -3,10 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "cd shruggbot-ui && npm install && npm run build && cd .. && rm -rf public && mkdir public && cp -r shruggbot-ui/build/* public && cd backend && npm install",
+    "postinstall": "npm run build-frontend && npm run copy-build && npm run install-backend",
+    "build-frontend": "cd shruggbot-ui && npm install && npm run build",
+    "copy-build": "node scripts/copy-build.js",
+    "install-backend": "cd backend && npm install",
     "start": "node backend/index.js"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "fs-extra": "^11.3.0"
   }
 }
