@@ -15,13 +15,14 @@ app.use(cors());
 
 console.log("👣 Starting ShruggBot server...");
 
+// Rate limit for API
 const shruggLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 50,
 });
 app.use('/api/shrugg', shruggLimiter);
 
-// Dummy handler
+// Dummy API handler
 app.post('/api/shrugg', async (req, res) => {
   const { text } = req.body;
   res.json({
@@ -30,27 +31,31 @@ app.post('/api/shrugg', async (req, res) => {
   });
 });
 
-// Serve React build
+// React static files
 const reactBuildPath = path.join(__dirname, 'shruggbot-ui', 'build');
 console.log("📂 React build path:", reactBuildPath);
+console.log("📁 React build exists?", fs.existsSync(reactBuildPath));
+console.log("🔍 Current working directory:", process.cwd());
+console.log("🗂 __dirname:", __dirname);
+
 app.use(express.static(reactBuildPath));
 
-// Health
+// Health check route
 app.get('/health', (_, res) => res.status(200).send('OK'));
 
-// Debug: check index.html
+// Debug route to check for index.html
 app.get('/debug-index', (_, res) => {
   const indexPath = path.join(reactBuildPath, 'index.html');
   const exists = fs.existsSync(indexPath);
   res.send(`index.html exists: ${exists}`);
 });
 
-// ✅ New fallback root route to avoid Railway 502
+// ✅ Fallback GET / route to prevent Railway 502
 app.get('/', (_, res) => {
   res.send('ShruggBot backend is running!');
 });
 
-// Catch-all to React app
+// Catch-all: serve React frontend
 app.get('*', (req, res) => {
   const indexFile = path.join(reactBuildPath, 'index.html');
   if (fs.existsSync(indexFile)) {
@@ -62,8 +67,12 @@ app.get('*', (req, res) => {
   }
 });
 
-// Use Railway-assigned port or 3000 locally
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
-});
+// Start server
+try {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
+  });
+} catch (err) {
+  console.error("❌ Server crashed on startup:", err);
+}
