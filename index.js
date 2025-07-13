@@ -146,7 +146,7 @@ app.post('/api/shrugg', async (req, res) => {
 // --- Catch-all Route for React Frontend ---
 // This MUST be the last route.
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(buildPath, 'index.html'));
+  res.send('ShruggBot backend is working!');
 });
 
 
