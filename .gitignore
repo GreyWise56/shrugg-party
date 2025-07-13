@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+# prevent accidental inclusion of build artifacts
+/build
+/shruggbot-ui/build
+
 # testing
 /coverage
 
@@ -21,3 +25,5 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#dummy text
