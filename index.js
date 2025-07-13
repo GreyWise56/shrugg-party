@@ -78,7 +78,7 @@ Your personality is defined by the following traits:
 
 RULES:
 - **Style:** Short, punchy, meme-worthy one-liners.
-- **Format:** You MUST call the 'shrugg_response' function. Do not add any other text.
+- You MUST call the 'shrugg_response' function only. Do not write anything else. Do not summarize or explain.
 - **Scoring:** Be unpredictable with the score (1-10).`,
     user: (text) => `React to this text: "${text}"`
   }),
@@ -145,6 +145,7 @@ app.post('/api/shrugg', async (req, res) => {
       }],
       tool_choice: "required"
     });
+console.log("💬 Raw Chat Response:", JSON.stringify(chatResponse, null, 2));
 
     const toolCalls = chatResponse.choices[0]?.message?.tool_calls;
     const fallbackResponse = {
