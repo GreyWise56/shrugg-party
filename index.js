@@ -156,7 +156,7 @@ app.get('/*', (req, res) => {
 
 
 // --- Server Startup & Graceful Shutdown ---
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
