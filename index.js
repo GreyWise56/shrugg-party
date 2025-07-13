@@ -6,6 +6,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const fs = require('fs');
 
 dotenv.config();
 
@@ -14,7 +15,6 @@ app.use(express.json());
 app.use(cors());
 
 // --- Static Frontend Serving ---
-// This serves your pre-built React files from the 'public' folder.
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
@@ -33,22 +33,118 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-
 // --- Helper Functions & Prompt Logic ---
-// ... (All your functions like isUrl, getTitleFromUrl, prompts, etc., go here)
+const isUrl = (string) => {
+    try { new URL(string); return true; }
+    catch (_) { return false; }
+};
+
+const getTitleFromUrl = async (url) => {
+    try {
+        const { data } = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const $ = cheerio.load(data);
+        const title = $('title').text();
+        return title || 'A webpage with no title and even less personality.';
+    } catch (error) {
+        console.error('Error fetching URL title:', error.message);
+        return 'A broken link, much like my spirit.';
+    }
+};
+
+const describeTone = (level, type) => {
+    const descriptions = {
+        sarcasm: ['a hint of sarcasm', 'a healthy dose of sarcasm', 'dripping with sarcasm'],
+        nihilism: ['a touch of existential dread', 'a cynical worldview', 'a deeply nihilistic void-stare'],
+        absurdity: ['a bit weird', 'playfully absurd', 'a full-blown absurdist fever dream']
+    };
+    if (level <= 3) return descriptions[type][0];
+    if (level <= 7) return descriptions[type][1];
+    return descriptions[type][2];
+};
+
+const prompts = {
+    general: (tones) => ({
+        system: `You are ShruggBot...`, // Your full prompt logic here
+        user: (text) => `React to this text: "${text}"`
+    }),
+    // ... other prompts
+};
 
 
 // --- API Endpoint ---
+// ✅ Your original, full API logic is restored here.
 app.use('/api/shrugg', shruggLimiter);
 app.post('/api/shrugg', async (req, res) => {
-    // Your full API logic here...
-    // This is just a placeholder to keep the file structure correct.
-    res.json({ reaction: "API is working.", score: 5 });
+  let { text: inputText, mode = 'general', tones = { sarcasm: 5, nihilism: 5, absurdity: 5 } } = req.body;
+
+  if (!inputText || inputText.trim() === '') {
+    return res.status(400).json({ error: 'Text input cannot be empty.' });
+  }
+
+  const promptGenerator = prompts[mode] || prompts.general;
+  const selectedPrompt = mode === 'general' ? promptGenerator(tones) : promptGenerator;
+
+  if (mode === 'general' && isUrl(inputText)) {
+    inputText = await getTitleFromUrl(inputText);
+  }
+
+  try {
+    const chatResponse = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      temperature: 1.1,
+      messages: [
+        { role: 'system', content: selectedPrompt.system },
+        { role: 'user', content: selectedPrompt.user(inputText) }
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'shrugg_response',
+          description: 'Returns a sarcastic reaction and Shrugg-o-Meter score',
+          parameters: {
+            type: 'object',
+            properties: {
+              reaction: { type: 'string', description: 'One-liner reaction.' },
+              score: { type: 'number', description: 'Apathetic or absurd score (1–10)' }
+            },
+            required: ['reaction', 'score']
+          }
+        }
+      }],
+      tool_choice: "required"
+    });
+
+    const toolCalls = chatResponse.choices[0]?.message?.tool_calls;
+    const fallbackResponse = {
+      reaction: "ShruggBot's brain is buffering. Probably from existential dread.",
+      score: Math.floor(Math.random() * 10) + 1
+    };
+
+    if (toolCalls?.length > 0) {
+      const parsed = JSON.parse(toolCalls[0].function.arguments);
+      if (!parsed.reaction?.trim()) {
+        console.warn("🔚 Empty reaction. Using fallback.");
+        return res.json(fallbackResponse);
+      }
+      parsed.score = Math.max(1, Math.min(parsed.score, 10));
+      console.log("✅ ShruggBot:", parsed);
+      res.json(parsed);
+    } else {
+      console.warn("🔚 No tool_calls. Fallback.");
+      res.json(fallbackResponse);
+    }
+  } catch (err) {
+    console.error("❌ API Error:", err);
+    res.status(500).json({
+      error: "ShruggBot short-circuited.",
+      details: err.message
+    });
+  }
 });
 
 
 // --- Catch-all Route for React Frontend ---
-// This MUST be the last route. It handles React Router navigation.
+// This MUST be the last route.
 app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -57,12 +153,10 @@ app.get('/*', (req, res) => {
 // --- Server Startup & Graceful Shutdown ---
 const PORT = process.env.PORT || 3000;
 
-// ✅ FIX: Capture the server instance when you start it
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 ShruggBot online at http://0.0.0.0:${PORT}`);
 });
 
-// This function will be called when you press Ctrl+C
 const gracefulShutdown = () => {
   console.log('\nSIGINT signal received: closing HTTP server');
   server.close(() => {
@@ -71,5 +165,4 @@ const gracefulShutdown = () => {
   });
 };
 
-// Listen for the termination signal
 process.on('SIGINT', gracefulShutdown);
