@@ -39,6 +39,29 @@
     document.documentElement.classList.add(theme);
   })();
 </script>
+<!-- Google tag (gtag.js) with Cookie Consent -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R2EJBJZKVL"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+
+  // Initial GA setup – disable until user accepts
+  gtag('js', new Date());
+  gtag('consent', 'default', {
+    'ad_storage': 'denied',
+    'analytics_storage': 'denied'
+  });
+
+  // Call this function when user accepts cookies
+  function allowCookies() {
+    gtag('consent', 'update', {
+      'ad_storage': 'granted',
+      'analytics_storage': 'granted'
+    });
+    gtag('config', 'G-R2EJBJZKVL');
+  }
+</script>
+
 </head>
 
 <body><noscript>JavaScript is required. Because obviously we didn’t build this in 1998.</noscript>
