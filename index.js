@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 // --- Static Frontend Serving ---
-const buildPath = path.join(__dirname, 'shruggbot-ui', 'build');
+const buildPath = path.join(__dirname, 'build');
 app.use(express.static(buildPath));
 
 // --- API Rate Limiting ---
