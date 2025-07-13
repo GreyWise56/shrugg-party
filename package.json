@@ -2,21 +2,56 @@
   "name": "shrugg-bot",
   "version": "1.0.0",
   "private": true,
+  "main": "index.js",
+  "proxy": "http://localhost:3000",
   "scripts": {
-    "build-frontend": "cd shruggbot-ui && npm install && npm run build",
-    "install-backend": "npm install",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "react-scripts build",
+    "dev": "concurrently \"node index.js\" \"npm run start-react\"",
+    "start-react": "cross-env PORT=3001 react-scripts start",
+    "test": "react-scripts test"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.14.3",
     "axios": "^1.10.0",
     "cheerio": "^1.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
-    "express": "^4.21.2",
+    "express": "^4.18.2",
     "express-rate-limit": "^6.11.2",
-    "openai": "^5.9.0"
+    "html2canvas": "^1.4.1",
+    "openai": "^5.9.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.6"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

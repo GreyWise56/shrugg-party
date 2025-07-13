@@ -1,6 +1,7 @@
 import React from 'react';
 import ShruggBot from './ShruggBot';
 import ShruggPlatform from './ShruggPlatform';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const LandingPage = () => {
   return (
@@ -8,9 +9,16 @@ const LandingPage = () => {
       {/* Header */}
       <header className="bg-white shadow-md">
         <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-gray-800">
-            The ¯\_(ツ)_/¯ Party
-          </div>
+          <div className="flex items-center text-2xl font-bold text-gray-800">
+  <span>The&nbsp;</span>
+  <DotLottieReact
+    src="/shrug-animation.lottie"
+    loop
+    autoplay
+    style={{ width: '80px', height: '80px' }}
+  />
+  <span>&nbsp;Party</span>
+</div>
           <div>
             <a
               href="https://postmeridiempost.com"
