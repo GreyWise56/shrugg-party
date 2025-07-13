@@ -15,8 +15,8 @@ app.use(express.json());
 app.use(cors());
 
 // --- Static Frontend Serving ---
-const publicPath = path.join(__dirname, 'public');
-app.use(express.static(publicPath));
+const buildPath = path.join(__dirname, 'build');
+app.use(express.static(buildPath));
 
 // --- API Rate Limiting ---
 const shruggLimiter = rateLimit({
@@ -146,7 +146,7 @@ app.post('/api/shrugg', async (req, res) => {
 // --- Catch-all Route for React Frontend ---
 // This MUST be the last route.
 app.get('/*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(buildPath, 'index.html'));
 });
 
 
