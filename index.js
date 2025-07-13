@@ -20,7 +20,7 @@ app.get('/ping', (req, res) => {
 });
 
 // --- Static Frontend Serving ---
-const buildPath = path.join(__dirname, 'build');
+const buildPath = path.join(__dirname, 'shruggbot-ui', 'build');
 app.use(express.static(buildPath));
 
 // --- API Rate Limiting ---
@@ -126,18 +126,26 @@ app.post('/api/shrugg', async (req, res) => {
     };
 
     if (toolCalls?.length > 0) {
-      const parsed = JSON.parse(toolCalls[0].function.arguments);
-      if (!parsed.reaction?.trim()) {
-        console.warn("🔚 Empty reaction. Using fallback.");
-        return res.json(fallbackResponse);
-      }
-      parsed.score = Math.max(1, Math.min(parsed.score, 10));
-      console.log("✅ ShruggBot:", parsed);
-      res.json(parsed);
-    } else {
-      console.warn("🔚 No tool_calls. Fallback.");
-      res.json(fallbackResponse);
-    }
+  let parsed;
+  try {
+    parsed = JSON.parse(toolCalls[0]?.function?.arguments || '{}');
+  } catch (e) {
+    console.warn("🔚 Failed to parse tool function arguments:", e.message);
+    return res.json(fallbackResponse);
+  }
+
+  if (!parsed.reaction?.trim()) {
+    console.warn("🔚 Empty reaction. Using fallback.");
+    return res.json(fallbackResponse);
+  }
+
+  parsed.score = Math.max(1, Math.min(parsed.score, 10));
+  console.log("✅ ShruggBot:", parsed);
+  return res.json(parsed);
+} else {
+  console.warn("🔚 No tool_calls. Fallback.");
+  return res.json(fallbackResponse);
+}
   } catch (err) {
     console.error("❌ API Error:", err);
     res.status(500).json({
