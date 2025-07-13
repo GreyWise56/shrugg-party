@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "react-scripts build",
+    "build": "cd shruggbot-ui && npm install && npm run build",
     "dev": "concurrently \"node index.js\" \"npm run start-react\"",
     "start-react": "cross-env PORT=3001 react-scripts start",
     "test": "react-scripts test"
