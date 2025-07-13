@@ -104,7 +104,7 @@ RULES:
 
 
 // --- API Endpoint ---
-// ✅ Your original, API logic is restored here.
+// ✅ Your original, Your API logic is restored here.
 app.use('/api/shrugg', shruggLimiter);
 app.post('/api/shrugg', async (req, res) => {
   let { text: inputText, mode = 'general', tones = { sarcasm: 5, nihilism: 5, absurdity: 5 } } = req.body;
