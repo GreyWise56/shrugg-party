@@ -21,7 +21,15 @@ app.get('/ping', (req, res) => {
 
 // --- Static Frontend Serving ---
 const buildPath = path.join(__dirname, 'build');
-app.use(express.static(buildPath));
+app.use(express.static(buildPath, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+}));
 
 // --- API Rate Limiting ---
 const shruggLimiter = rateLimit({
